@@ -2148,10 +2148,6 @@ const token = getJanusToken('janus', ['janus.plugin.videoroom']),
  * need to provide or other transport-specific ones.
  *
  * For what concerns the syntax, it's very similar to the \ref rest and
-<<<<<<< HEAD
- * so this page will briefly discuss the differences. At the moment, a few
- * different methods are exposed:
-=======
  * so this page will briefly discuss the differences. Notice that, when
  * using WebSockets, you'll have to use <code>janus-admin-protocol</code>
  * as the subprotocol, instead of the <code>janus-protocol</code> of the
@@ -2190,7 +2186,6 @@ const token = getJanusToken('janus', ['janus.plugin.videoroom']),
  * - \c set_max_nack_queue: change the value of the max NACK queue window;
  * - \c set_no_media_timer: change the value of the no-media timer property;
  * - \c set_slowlink_threshold: change the value of the slowlink-threshold property.
->>>>>>> e790e176... Changed slowlink to use lost packets instead of NACKs, and made it configurable (#1664)
  *
  * - \c list_sessions: list all the sessions currently active in Janus
  * (returns an array of session identifiers);
