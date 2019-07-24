@@ -1,0 +1,139 @@
+version: '1.0'
+steps:
+  main_clone:
+    type: "git-clone"
+    description: "Cloning main repository..."
+    repo: "caffeinetv/janus-gateway"
+    revision: "${{CF_BRANCH}}"
+  BuildJanusBase:
+    type: build
+    title: Build Janus base image
+    description: "Build Janus base image"
+    image_name: caffeine/janus_base
+    tag: '${{CF_BRANCH_TAG_NORMALIZED}}'
+    dockerfile: caffeine/Dockerfile
+  BuildJanus:
+    title: Build Janus binaries
+    description: "Build Janus binaries in shared volume"
+    image: ${{BuildJanusBase}}
+    working_directory: ${{main_clone}}
+    commands:
+      - ./caffeine/scripts/codefresh-build.sh
+  plugin_clone:
+    type: "git-clone"
+    description: "Cloning plugin repository..."
+    working_directory: ~/janus-plugin-forwarder
+    repo: "caffeinetv/janus-plugin-forwarder"
+    revision: tags/stable
+  BuildJanusPlugin:
+    title: Build Janus Plugin
+    working_directory: ${{plugin_clone}}
+    image: ${{BuildJanusBase}}
+    commands:
+      - JANUSP=$CF_VOLUME_PATH/opt/janus make install
+  CreateArtifacts:
+    title: Create Artifacts
+    description: Create artifact archives
+    image: ${{BuildJanusBase}}
+    working_directory: /codefresh/volume
+    commands:
+      - |-
+        artifact=""
+        tar cvzf janus.tgz ./opt
+        # Just for verification
+        tar tzf janus.tgz
+        tag="$(date "+%Y%m%d-%H%M%S")-$CF_SHORT_REVISION"
+        echo tag=${tag} >> env_vars_to_export
+  UploadArtifacts:
+    type: parallel
+    steps:
+      UploadPr:
+        title: Upload PR binary archive
+        description: |-
+          Upload PR binary archive to S3
+        image: 'opsgang/awscli:stable'
+        environment:
+          - AWS_REGION=us-west-2
+        working_directory: /codefresh/volume
+        commands:
+          - |-
+            artifact=janus-pr${CF_PULL_REQUEST_NUMBER}-${tag}-b${CF_BUILD_ID}.tgz
+            aws s3api put-object \
+              --acl bucket-owner-full-control \
+              --body janus.tgz \
+              --bucket caffeine-salt \
+              --key cdn/files/janus-bin/$artifact
+        when:
+          steps:
+            - name: CreateArtifacts
+              on:
+                - success
+      UploadLatestPr:
+        title: Upload latest PR binary archive
+        description: |-
+          Upload master binary archive to S3
+        image: 'opsgang/awscli:stable'
+        environment:
+          - AWS_REGION=us-west-2
+        working_directory: /codefresh/volume
+        commands:
+          - |-
+            aws s3api put-object \
+              --acl bucket-owner-full-control \
+              --body janus.tgz \
+              --bucket caffeine-salt \
+              --key cdn/files/janus-bin/janus-latest-pr.tgz
+        when:
+          steps:
+            - name: CreateArtifacts
+              on:
+                - success
+      UploadMaster:
+        title: Upload master binary archive
+        description: |-
+          Upload master binary archive to S3
+        image: 'opsgang/awscli:stable'
+        environment:
+          - AWS_REGION=us-west-2
+        working_directory: /codefresh/volume
+        commands:
+          - |-
+            artifact=janus-master-${tag}-b${CF_BUILD_ID}.tgz
+            aws s3api put-object \
+              --acl bucket-owner-full-control \
+              --body janus.tgz \
+              --bucket caffeine-salt \
+              --key cdn/files/janus-bin/$artifact
+        when:
+          branch:
+            only:
+              - master
+          steps:
+            - name: CreateArtifacts
+              on:
+                - success
+      UploadLatestMaster:
+        title: Upload latest master binary archive
+        description: |-
+          Upload master binary archive to S3
+        image: 'opsgang/awscli:stable'
+        environment:
+          - AWS_REGION=us-west-2
+        working_directory: /codefresh/volume
+        commands:
+          - |-
+            aws s3api put-object \
+              --acl bucket-owner-full-control \
+              --body janus.tgz \
+              --bucket caffeine-salt \
+              --key cdn/files/janus-bin/janus-latest-master.tgz
+        when:
+          branch:
+            only:
+              - master
+          steps:
+            - name: CreateArtifacts
+              on:
+                - success
+
+
