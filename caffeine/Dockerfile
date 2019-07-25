@@ -61,33 +61,3 @@ RUN cd ~ \
     && make shared_library \
     && make install
 
-# RUN mkdir janus-gateway
-# COPY . janus-gateway/
-# WORKDIR janus-gateway
-
-# # make Janus
-# RUN sh autogen.sh
-# RUN ./configure \
-#     --prefix=/opt/janus \
-#     --disable-data-channels \
-#     --disable-docs \
-#     --disable-mqtt \
-#     --disable-plugin-audiobridge \
-#     --disable-plugin-echotest \
-#     --disable-plugin-recordplay \
-#     --disable-plugin-sip \
-#     --disable-plugin-textroom \
-#     --disable-plugin-videocall \
-#     --disable-plugin-voicemail \
-#     --disable-post-processing \
-#     --disable-rabbitmq \
-#     --disable-turn-rest-api \
-#     --disable-sample-event-handler \
-#     --disable-websockets \
-#     --enable-unix-sockets \
-#     --enable-plugin-streaming \
-#     --enable-plugin-videoroom \
-#     --enable-rest \
-#     --enable-static
-
-# RUN make check install

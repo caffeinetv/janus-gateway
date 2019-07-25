@@ -58,6 +58,7 @@ steps:
         commands:
           - |-
             artifact=janus-pr${CF_PULL_REQUEST_NUMBER}-${tag}-b${CF_BUILD_ID}.tgz
+            echo "Uploading /caffeine-salt/janus-bin/$artifact"
             aws s3api put-object \
               --acl bucket-owner-full-control \
               --body janus.tgz \
@@ -78,6 +79,7 @@ steps:
         working_directory: /codefresh/volume
         commands:
           - |-
+            echo "Uploading /caffeine-salt/janus-bin/janus-latest-pr.tgz"
             aws s3api put-object \
               --acl bucket-owner-full-control \
               --body janus.tgz \
@@ -99,6 +101,7 @@ steps:
         commands:
           - |-
             artifact=janus-master-${tag}-b${CF_BUILD_ID}.tgz
+            echo "Uploading /caffeine-salt/janus-bin/$artifact"
             aws s3api put-object \
               --acl bucket-owner-full-control \
               --body janus.tgz \
@@ -122,6 +125,7 @@ steps:
         working_directory: /codefresh/volume
         commands:
           - |-
+            echo "Uploading /caffeine-salt/janus-bin/janus-latest-master.tgz"
             aws s3api put-object \
               --acl bucket-owner-full-control \
               --body janus.tgz \
